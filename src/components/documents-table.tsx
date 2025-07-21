@@ -1,12 +1,30 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import * as React from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Upload,
   Filter,
@@ -18,17 +36,18 @@ import {
   Download,
   Edit,
   Trash2,
-} from "lucide-react"
+} from "lucide-react";
+import { ImportDocumentModal } from "./import-document-modal";
 
 interface Document {
-  id: string
-  title: string
-  description: string
-  tags: string[]
-  uploaded: string
-  uploadedDate: Date
-  fileSize?: string
-  fileType?: string
+  id: string;
+  title: string;
+  description: string;
+  tags: string[];
+  uploaded: string;
+  uploadedDate: Date;
+  fileSize?: string;
+  fileType?: string;
 }
 
 const documents: Document[] = [
@@ -63,41 +82,44 @@ const documents: Document[] = [
     fileSize: "3.2 MB",
     fileType: "PDF",
   },
-]
+];
 
 export function DocumentsTable() {
-  const [searchTerm, setSearchTerm] = React.useState("")
-  const [selectedTags, setSelectedTags] = React.useState<string[]>([])
-  const [pageSize, setPageSize] = React.useState(10)
-  const [currentPage, setCurrentPage] = React.useState(1)
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
+  const [pageSize, setPageSize] = React.useState(10);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [modalOpen, setModalOpen] = React.useState(false);
 
   // Get all unique tags from documents
   const allTags = React.useMemo(() => {
-    const tagSet = new Set<string>()
-    documents.forEach((doc) => doc.tags.forEach((tag) => tagSet.add(tag)))
-    return Array.from(tagSet)
-  }, [])
+    const tagSet = new Set<string>();
+    documents.forEach((doc) => doc.tags.forEach((tag) => tagSet.add(tag)));
+    return Array.from(tagSet);
+  }, []);
 
   const filteredDocuments = documents.filter((document) => {
     const matchesSearch =
       document.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      document.description.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesTags = selectedTags.length === 0 || selectedTags.some((tag) => document.tags.includes(tag))
-    return matchesSearch && matchesTags
-  })
+      document.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTags =
+      selectedTags.length === 0 ||
+      selectedTags.some((tag) => document.tags.includes(tag));
+    return matchesSearch && matchesTags;
+  });
 
-  const totalPages = Math.ceil(filteredDocuments.length / pageSize)
-  const startIndex = (currentPage - 1) * pageSize
-  const endIndex = startIndex + pageSize
-  const currentDocuments = filteredDocuments.slice(startIndex, endIndex)
+  const totalPages = Math.ceil(filteredDocuments.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentDocuments = filteredDocuments.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)))
-  }
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
 
   const renderTags = (tags: string[]) => {
     if (tags.length === 0) {
-      return <span className="text-gray-500 text-sm">No tags</span>
+      return <span className="text-gray-500 text-sm">No tags</span>;
     }
     return (
       <div className="flex flex-wrap gap-1">
@@ -112,8 +134,8 @@ export function DocumentsTable() {
           </Badge>
         )}
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -123,7 +145,10 @@ export function DocumentsTable() {
           <h1 className="text-2xl font-bold text-gray-900">Documents</h1>
           <p className="text-gray-600 mt-1">Manage your documents here.</p>
         </div>
-        <Button className="bg-black hover:bg-gray-800 text-white">
+        <Button
+          className="bg-black hover:bg-gray-800 text-white"
+          onClick={() => setModalOpen(true)}
+        >
           <Upload className="w-4 h-4 mr-2" />
           Import
         </Button>
@@ -159,15 +184,20 @@ export function DocumentsTable() {
               ) : (
                 <div className="space-y-1">
                   {allTags.map((tag) => (
-                    <label key={tag} className="flex items-center space-x-2 text-sm">
+                    <label
+                      key={tag}
+                      className="flex items-center space-x-2 text-sm"
+                    >
                       <input
                         type="checkbox"
                         checked={selectedTags.includes(tag)}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedTags([...selectedTags, tag])
+                            setSelectedTags([...selectedTags, tag]);
                           } else {
-                            setSelectedTags(selectedTags.filter((t) => t !== tag))
+                            setSelectedTags(
+                              selectedTags.filter((t) => t !== tag)
+                            );
                           }
                         }}
                         className="rounded border-gray-300"
@@ -178,7 +208,12 @@ export function DocumentsTable() {
                 </div>
               )}
               {selectedTags.length > 0 && (
-                <Button variant="ghost" size="sm" onClick={() => setSelectedTags([])} className="w-full mt-2 text-xs">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedTags([])}
+                  className="w-full mt-2 text-xs"
+                >
                   Clear filters
                 </Button>
               )}
@@ -202,7 +237,10 @@ export function DocumentsTable() {
           <TableBody>
             {currentDocuments.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                <TableCell
+                  colSpan={5}
+                  className="text-center py-8 text-gray-500"
+                >
                   {searchTerm || selectedTags.length > 0
                     ? "No documents found matching your filters."
                     : "No documents found."}
@@ -211,14 +249,24 @@ export function DocumentsTable() {
             ) : (
               currentDocuments.map((document) => (
                 <TableRow key={document.id} className="hover:bg-gray-50">
-                  <TableCell className="font-medium">{document.title}</TableCell>
-                  <TableCell className="text-gray-600">{document.description}</TableCell>
+                  <TableCell className="font-medium">
+                    {document.title}
+                  </TableCell>
+                  <TableCell className="text-gray-600">
+                    {document.description}
+                  </TableCell>
                   <TableCell>{renderTags(document.tags)}</TableCell>
-                  <TableCell className="text-gray-600">{document.uploaded}</TableCell>
+                  <TableCell className="text-gray-600">
+                    {document.uploaded}
+                  </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-8 h-8 p-0"
+                        >
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -247,15 +295,17 @@ export function DocumentsTable() {
 
       {/* Pagination */}
       <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-600">Total {filteredDocuments.length} row(s)</div>
+        <div className="text-sm text-gray-600">
+          Total {filteredDocuments.length} row(s)
+        </div>
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Rows per page</span>
             <Select
               value={pageSize.toString()}
               onValueChange={(value) => {
-                setPageSize(Number(value))
-                setCurrentPage(1)
+                setPageSize(Number(value));
+                setCurrentPage(1);
               }}
             >
               <SelectTrigger className="w-16">
@@ -314,6 +364,7 @@ export function DocumentsTable() {
           </div>
         </div>
       </div>
+      <ImportDocumentModal open={modalOpen} onOpenChange={setModalOpen} />
     </div>
-  )
+  );
 }

@@ -1,17 +1,30 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import * as React from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   Upload,
   ChevronDown,
@@ -25,16 +38,17 @@ import {
   Mail,
   Phone,
   ArrowUpDown,
-} from "lucide-react"
+} from "lucide-react";
+import { AddContactsModal } from "./add-contacts-modal";
 
 interface Contact {
-  id: string
-  name: string
-  email: string
-  company: string
-  addedOn: string
-  addedDate: Date
-  phone?: string
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  addedOn: string;
+  addedDate: Date;
+  phone?: string;
 }
 
 const contacts: Contact[] = [
@@ -83,84 +97,88 @@ const contacts: Contact[] = [
     addedDate: new Date("2025-06-15"),
     phone: "+1 (555) 333-4444",
   },
-]
+];
 
-type SortField = "name" | "email" | "company" | "addedOn"
-type SortDirection = "asc" | "desc" | null
+type SortField = "name" | "email" | "company" | "addedOn";
+type SortDirection = "asc" | "desc" | null;
 
 export function ContactsTable() {
-  const [searchTerm, setSearchTerm] = React.useState("")
-  const [pageSize, setPageSize] = React.useState(10)
-  const [currentPage, setCurrentPage] = React.useState(1)
-  const [sortField, setSortField] = React.useState<SortField | null>(null)
-  const [sortDirection, setSortDirection] = React.useState<SortDirection>(null)
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [pageSize, setPageSize] = React.useState(10);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [sortField, setSortField] = React.useState<SortField | null>(null);
+  const [sortDirection, setSortDirection] = React.useState<SortDirection>(null);
+  const [modalOpen, setModalOpen] = React.useState(false);
+
   const [visibleColumns, setVisibleColumns] = React.useState({
     name: true,
     email: true,
     company: true,
     addedOn: true,
     actions: true,
-  })
+  });
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       if (sortDirection === "asc") {
-        setSortDirection("desc")
+        setSortDirection("desc");
       } else if (sortDirection === "desc") {
-        setSortField(null)
-        setSortDirection(null)
+        setSortField(null);
+        setSortDirection(null);
       } else {
-        setSortDirection("asc")
+        setSortDirection("asc");
       }
     } else {
-      setSortField(field)
-      setSortDirection("asc")
+      setSortField(field);
+      setSortDirection("asc");
     }
-  }
+  };
 
   const sortedContacts = React.useMemo(() => {
-    if (!sortField || !sortDirection) return contacts
+    if (!sortField || !sortDirection) return contacts;
 
     return [...contacts].sort((a, b) => {
-      let aValue: string | Date
-      let bValue: string | Date
+      let aValue: string | Date;
+      let bValue: string | Date;
 
       if (sortField === "addedOn") {
-        aValue = a.addedDate
-        bValue = b.addedDate
+        aValue = a.addedDate;
+        bValue = b.addedDate;
       } else {
-        aValue = a[sortField].toLowerCase()
-        bValue = b[sortField].toLowerCase()
+        aValue = a[sortField].toLowerCase();
+        bValue = b[sortField].toLowerCase();
       }
 
-      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1
-      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1
-      return 0
-    })
-  }, [sortField, sortDirection])
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [sortField, sortDirection]);
 
   const filteredContacts = sortedContacts.filter(
     (contact) =>
       contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.company.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      contact.company.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const totalPages = Math.ceil(filteredContacts.length / pageSize)
-  const startIndex = (currentPage - 1) * pageSize
-  const endIndex = startIndex + pageSize
-  const currentContacts = filteredContacts.slice(startIndex, endIndex)
+  const totalPages = Math.ceil(filteredContacts.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentContacts = filteredContacts.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)))
-  }
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
 
   const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return <ArrowUpDown className="ml-2 h-4 w-4" />
-    if (sortDirection === "asc") return <ArrowUpDown className="ml-2 h-4 w-4 rotate-180" />
-    if (sortDirection === "desc") return <ArrowUpDown className="ml-2 h-4 w-4" />
-    return <ArrowUpDown className="ml-2 h-4 w-4" />
-  }
+    if (sortField !== field) return <ArrowUpDown className="ml-2 h-4 w-4" />;
+    if (sortDirection === "asc")
+      return <ArrowUpDown className="ml-2 h-4 w-4 rotate-180" />;
+    if (sortDirection === "desc")
+      return <ArrowUpDown className="ml-2 h-4 w-4" />;
+    return <ArrowUpDown className="ml-2 h-4 w-4" />;
+  };
 
   return (
     <div className="space-y-6">
@@ -168,9 +186,14 @@ export function ContactsTable() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Contacts</h1>
-          <p className="text-gray-600 mt-1">Upload and manage your contacts here</p>
+          <p className="text-gray-600 mt-1">
+            Upload and manage your contacts here
+          </p>
         </div>
-        <Button className="bg-black hover:bg-gray-800 text-white">
+        <Button
+          className="bg-black hover:bg-gray-800 text-white"
+          onClick={() => setModalOpen(true)}
+        >
           <Upload className="w-4 h-4 mr-2" />
           Upload
         </Button>
@@ -196,31 +219,41 @@ export function ContactsTable() {
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuCheckboxItem
               checked={visibleColumns.name}
-              onCheckedChange={(checked) => setVisibleColumns((prev) => ({ ...prev, name: checked }))}
+              onCheckedChange={(checked) =>
+                setVisibleColumns((prev) => ({ ...prev, name: checked }))
+              }
             >
               Name
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
               checked={visibleColumns.email}
-              onCheckedChange={(checked) => setVisibleColumns((prev) => ({ ...prev, email: checked }))}
+              onCheckedChange={(checked) =>
+                setVisibleColumns((prev) => ({ ...prev, email: checked }))
+              }
             >
               Email
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
               checked={visibleColumns.company}
-              onCheckedChange={(checked) => setVisibleColumns((prev) => ({ ...prev, company: checked }))}
+              onCheckedChange={(checked) =>
+                setVisibleColumns((prev) => ({ ...prev, company: checked }))
+              }
             >
               Company
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
               checked={visibleColumns.addedOn}
-              onCheckedChange={(checked) => setVisibleColumns((prev) => ({ ...prev, addedOn: checked }))}
+              onCheckedChange={(checked) =>
+                setVisibleColumns((prev) => ({ ...prev, addedOn: checked }))
+              }
             >
               Added On
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
               checked={visibleColumns.actions}
-              onCheckedChange={(checked) => setVisibleColumns((prev) => ({ ...prev, actions: checked }))}
+              onCheckedChange={(checked) =>
+                setVisibleColumns((prev) => ({ ...prev, actions: checked }))
+              }
             >
               Actions
             </DropdownMenuCheckboxItem>
@@ -281,7 +314,9 @@ export function ContactsTable() {
                   </Button>
                 </TableHead>
               )}
-              {visibleColumns.actions && <TableHead className="font-medium w-12"></TableHead>}
+              {visibleColumns.actions && (
+                <TableHead className="font-medium w-12"></TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -291,25 +326,47 @@ export function ContactsTable() {
                   colSpan={Object.values(visibleColumns).filter(Boolean).length}
                   className="text-center py-8 text-gray-500"
                 >
-                  {searchTerm ? "No contacts found matching your search." : "No contacts found."}
+                  {searchTerm
+                    ? "No contacts found matching your search."
+                    : "No contacts found."}
                 </TableCell>
               </TableRow>
             ) : (
               currentContacts.map((contact) => (
                 <TableRow key={contact.id} className="hover:bg-gray-50">
-                  {visibleColumns.name && <TableCell className="font-medium">{contact.name}</TableCell>}
-                  {visibleColumns.email && <TableCell className="text-gray-600">{contact.email}</TableCell>}
-                  {visibleColumns.company && (
-                    <TableCell className="text-gray-600">
-                      {contact.company === "-" ? <span className="text-gray-400">-</span> : contact.company}
+                  {visibleColumns.name && (
+                    <TableCell className="font-medium">
+                      {contact.name}
                     </TableCell>
                   )}
-                  {visibleColumns.addedOn && <TableCell className="text-gray-600">{contact.addedOn}</TableCell>}
+                  {visibleColumns.email && (
+                    <TableCell className="text-gray-600">
+                      {contact.email}
+                    </TableCell>
+                  )}
+                  {visibleColumns.company && (
+                    <TableCell className="text-gray-600">
+                      {contact.company === "-" ? (
+                        <span className="text-gray-400">-</span>
+                      ) : (
+                        contact.company
+                      )}
+                    </TableCell>
+                  )}
+                  {visibleColumns.addedOn && (
+                    <TableCell className="text-gray-600">
+                      {contact.addedOn}
+                    </TableCell>
+                  )}
                   {visibleColumns.actions && (
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-8 h-8 p-0"
+                          >
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -343,15 +400,17 @@ export function ContactsTable() {
 
       {/* Pagination */}
       <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-600">Total {filteredContacts.length} row(s)</div>
+        <div className="text-sm text-gray-600">
+          Total {filteredContacts.length} row(s)
+        </div>
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Rows per page</span>
             <Select
               value={pageSize.toString()}
               onValueChange={(value) => {
-                setPageSize(Number(value))
-                setCurrentPage(1)
+                setPageSize(Number(value));
+                setCurrentPage(1);
               }}
             >
               <SelectTrigger className="w-16">
@@ -410,6 +469,7 @@ export function ContactsTable() {
           </div>
         </div>
       </div>
+      <AddContactsModal open={modalOpen} onOpenChange={setModalOpen} />
     </div>
-  )
+  );
 }
