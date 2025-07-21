@@ -1,53 +1,183 @@
-import { AppSidebar } from "@/components/app-sidebar"
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
+  Send,
+  FileText,
+  UserPlus,
+  BarChart3,
+  CheckCircle,
+  Mail,
+  ArrowRight,
+} from "lucide-react";
+import { StatusBadges } from "@/components/common/StatusBadges";
+import { getActivityIconColor } from "@/components/common/ActivityColorIc";
 
-export default function Page() {
+const quickActions = [
+  {
+    icon: Send,
+    title: "Send for Signature",
+    description: "Send document for signing",
+    color: "bg-blue-50 text-blue-600",
+  },
+  {
+    icon: FileText,
+    title: "New Document",
+    description: "Upload new document",
+    color: "bg-green-50 text-green-600",
+  },
+  {
+    icon: UserPlus,
+    title: "New Contact",
+    description: "Upload new contact",
+    color: "bg-orange-50 text-orange-600",
+  },
+  {
+    icon: BarChart3,
+    title: "Activity",
+    description: "View recent activity",
+    color: "bg-purple-50 text-purple-600",
+  },
+];
+
+const recentActivities = [
+  {
+    id: 1,
+    title: "sign this bro",
+    user: "psn",
+    timestamp: "Jul 19, 2025, 08:16 AM",
+    status: "completed",
+    icon: CheckCircle,
+  },
+  {
+    id: 2,
+    title: "sign this bro",
+    user: "psn",
+    timestamp: "Jul 19, 2025, 08:15 AM",
+    status: "opened",
+    icon: Mail,
+  },
+  {
+    id: 3,
+    title: "sign this bro",
+    user: "psn",
+    timestamp: "Jul 19, 2025, 08:14 AM",
+    status: "sent",
+    icon: Send,
+  },
+  {
+    id: 4,
+    title: "new-agreement for test",
+    user: "pari",
+    timestamp: "Jul 19, 2025, 08:10 AM",
+    status: "sent",
+    icon: Send,
+  },
+  {
+    id: 5,
+    title: "axsxsxsxsx",
+    user: "pari",
+    timestamp: "Jun 25, 2025, 03:36 PM",
+    status: "sent",
+    icon: Send,
+  },
+];
+
+
+export default function DashboardOverview() {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-[orientation=vertical]:h-4"
-          />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="#">
-                  Building Your Application
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </header>
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-          </div>
-          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
-  )
+    <div className="container mx-auto p-4 md:p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Quick Actions Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Common tasks and shortcuts</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {quickActions.map((action, index) => {
+                const IconComponent = action.icon;
+                return (
+                  <Button
+                    key={index}
+                    variant="ghost"
+                    className="w-full justify-start h-auto p-3 hover:bg-gray-50"
+                  >
+                    <div
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 ${action.color}`}
+                    >
+                      <IconComponent className="w-5 h-5" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-medium text-sm text-gray-900">
+                        {action.title}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {action.description}
+                      </div>
+                    </div>
+                  </Button>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Activity Card */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>Latest document interactions</CardDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-blue-600 hover:text-blue-700"
+              >
+                View All
+                <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentActivities.map((activity) => {
+                const IconComponent = activity.icon;
+                return (
+                  <div key={activity.id} className="flex items-center gap-3">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${getActivityIconColor(
+                        activity.status
+                      )}`}
+                    >
+                      <IconComponent className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm text-gray-900 truncate">
+                        {activity.title}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {activity.user} • {activity.timestamp}
+                      </div>
+                    </div>
+                    <div className="flex-shrink-0">
+                      {StatusBadges(activity.status)}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 }
