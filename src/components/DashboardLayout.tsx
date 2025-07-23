@@ -1,7 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { AppSidebar } from "@/components/app-sidebar";
+import axios from "axios";
+import { useEffect } from "react";
+import { useAuthStore } from "@/app/store/authStore";
+import { AppSidebar } from "@/components/AppSidebar";
 import {
   Breadcrumb,
   BreadcrumbItem as BreadcrumbItemComponent,
@@ -28,7 +31,8 @@ export function DashboardLayout({
   breadcrumbs = [],
 }: DashboardLayoutProps) {
   const pathname = usePathname();
-
+  const { token, setUserData } = useAuthStore();
+  console.log("DashboardLayout token:", token);
   const authPages = ["/login", "/signup"];
   const isAuthPage = authPages.includes(pathname);
   const title =
@@ -41,6 +45,34 @@ export function DashboardLayout({
       : pathname === "/documents"
       ? "Documents"
       : "";
+
+  useEffect(() => {
+    console.log("DashboardLayout mounted");
+
+    const fetchUserData = () => {
+      axios
+        .get(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        })
+        .then((response) => {
+          if (response.data.status === "success" && response.data.data) {
+            setUserData(response.data.data);
+            console.log("User data fetched successfully:", response.data.data);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching user data:", error);
+        });
+    };
+
+    // Only fetch if we have a token and are not on auth pages
+    if (token && !isAuthPage) {
+      fetchUserData();
+    }
+  }, [token, isAuthPage, setUserData]);
 
   return !isAuthPage ? (
     <SidebarProvider>

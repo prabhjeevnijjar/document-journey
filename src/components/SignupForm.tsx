@@ -158,8 +158,8 @@ export function SignupForm({
         if (response.status === 200 && response.data.status === "success") {
           console.log({ response });
           toast.success("Account created successfully!");
+          
           setToken(response.data.token);
-          localStorage.setItem("token", response.data.token);
 
           setIsLoading(false);
           router.push("/dashboard");
