@@ -15,11 +15,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { OTPInput } from "@/components/OtpInput";
 import Link from "next/link";
+import { useAuthStore } from "@/app/store/authStore";
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const token = useAuthStore((state) => state.token);
+  const setToken = useAuthStore((state) => state.setToken);
+
   const [otp, setOtp] = useState("");
   const [showOtpField, setShowOtpField] = useState(false);
 
@@ -38,6 +42,10 @@ export function SignupForm({
     console.log("OTP sent!");
   };
 
+  const handleResendOtp = () => {
+    // Logic to resend OTP
+    console.log("OTP resent!");
+  };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -48,7 +56,10 @@ export function SignupForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form className="space-y-6" onSubmit={(e) => {
+            e.preventDefault();
+            handleSendOtp();
+          }}>
             <div className="grid gap-6">
               <div className="grid gap-6">
                 <div className="grid gap-2">
@@ -70,17 +81,17 @@ export function SignupForm({
                       required
                       className="flex-1"
                     />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleSendOtp}
-                      disabled={showOtpField}
-                    >
-                      {showOtpField ? "Sent" : "Send OTP"}
-                    </Button>
                   </div>
                 </div>
 
+                <div className="grid gap-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input id="password" type="password" required />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <Input id="confirm-password" type="password" required />
+                </div>
                 {showOtpField && (
                   <div className="grid gap-2">
                     <Label htmlFor="otp">Email Verification Code</Label>
@@ -95,6 +106,7 @@ export function SignupForm({
                       <p className="text-sm text-muted-foreground text-center">
                         Enter the 6-digit code sent to your email
                       </p>
+                      {/* Didn&apos;t receive the code?  */}
                       <Button
                         type="button"
                         variant="ghost"
@@ -102,26 +114,17 @@ export function SignupForm({
                         className="text-sm text-muted-foreground hover:text-foreground"
                         onClick={handleSendOtp}
                       >
-                        Didn&apos;t receive the code? Resend
+                        Resend
                       </Button>
                     </div>
                   </div>
                 )}
-
-                <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" required />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
-                  <Input id="confirm-password" type="password" required />
-                </div>
                 <Button
                   type="submit"
                   className="w-full"
                   disabled={showOtpField && otp.length !== 6}
                 >
-                  Create Account
+                  {!showOtpField ? "Send OTP" : "Create Account"}
                 </Button>
               </div>
               <div className="text-center text-sm">
