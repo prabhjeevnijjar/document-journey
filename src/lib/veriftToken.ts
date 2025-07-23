@@ -1,15 +1,14 @@
-// lib/verifyToken.ts
-import jwt from "jsonwebtoken";
+// src/lib/verifyToken.ts
+import { jwtVerify } from "jose";
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET!);
 
-export function verifyToken(token: string) {
-  if (!JWT_SECRET) throw new Error("JWT_SECRET not set");
-
+export async function verifyToken(token: string) {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    return decoded; // contains { id, email, ... }
-  } catch {
+    const { payload } = await jwtVerify(token, JWT_SECRET);
+    return payload; // Contains decoded token like { id, email, ... }
+  } catch (err) {
+    console.error("Token verification failed:", err);
     return null;
   }
 }
