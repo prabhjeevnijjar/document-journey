@@ -20,19 +20,30 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-
+interface JWTPayload {
+  id: number;
+  email: string;
+  role: string;
+  isVerified: boolean;
+  createdAt: string;
+  iat?: number;
+  exp?: number;
+}
 interface DashboardLayoutProps {
+  user: JWTPayload | null;
+
   children: React.ReactNode;
   breadcrumbs?: { label: string; href?: string }[];
 }
 
 export function DashboardLayout({
+  user,
   children,
   breadcrumbs = [],
 }: DashboardLayoutProps) {
   const pathname = usePathname();
   const { token, setUserData } = useAuthStore();
-  console.log("DashboardLayout token:", token);
+
   const authPages = ["/login", "/signup"];
   const isAuthPage = authPages.includes(pathname);
   const title =
@@ -45,7 +56,15 @@ export function DashboardLayout({
       : pathname === "/documents"
       ? "Documents"
       : "";
-
+  useEffect(() => {
+    console.log("DashboardLayout mounted with user:", user);
+    if (user) {
+      setUserData(user);
+      console.log("User data set in store:", user);
+    } else {
+      console.warn("No user data provided to DashboardLayout");
+    }
+  }, []);
   useEffect(() => {
     console.log("DashboardLayout mounted");
 
@@ -59,7 +78,6 @@ export function DashboardLayout({
         })
         .then((response) => {
           if (response.data.status === "success" && response.data.data) {
-            setUserData(response.data.data);
             console.log("User data fetched successfully:", response.data.data);
           }
         })
@@ -67,12 +85,12 @@ export function DashboardLayout({
           console.error("Error fetching user data:", error);
         });
     };
-
+    console.log("Token:", token);
     // Only fetch if we have a token and are not on auth pages
     if (token && !isAuthPage) {
       fetchUserData();
     }
-  }, [token, isAuthPage, setUserData]);
+  });
 
   return !isAuthPage ? (
     <SidebarProvider>

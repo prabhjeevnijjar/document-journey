@@ -12,11 +12,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useAuthStore } from "@/app/store/authStore";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const setToken = useAuthStore((state) => state.setToken);
 
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -51,7 +53,9 @@ export function LoginForm({
       })
       .then((response) => {
         if (response.status === 200 && response.data.status === "success") {
-          // Store the token
+          // Store the token        
+            setToken(response.data.token);
+
           toast.success("Logged in successfully!");
           router.push("/dashboard");
         }
