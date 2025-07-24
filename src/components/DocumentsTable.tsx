@@ -37,7 +37,7 @@ import {
   Edit,
   Trash2,
 } from "lucide-react";
-import { ImportDocumentModal } from "./import-document-modal";
+import { ImportDocumentModal } from "./UploadDocumentModal";
 
 interface Document {
   id: string;

@@ -1,4 +1,4 @@
-import { DocumentsTable } from "@/components/documents-table";
+import { DocumentsTable } from "@/components/DocumentsTable";
 
 export default function DocumentsPage() {
   return (
