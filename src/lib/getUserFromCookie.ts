@@ -1,24 +1,32 @@
 import jwt from "jsonwebtoken";
-import { cookies } from "next/headers";
+
 export interface JWTPayload {
-  id: number;
-  email: string;
-  role: string;
-  isVerified: boolean;
-  createdAt: string;
+  sub: number;
   iat?: number;
   exp?: number;
 }
-export async function getUserFromCookie(): Promise<JWTPayload | null> {
-  // Add type assertion to handle ReadonlyRequestCookies
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
-
-  if (!token) return null;
-
+export function getUserFromCookie(): string | null {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload;
-  } catch {
+    // Check if we're on the client side
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    const cookies = document.cookie.split(";");
+    const tokenCookie = cookies.find((cookie) =>
+      cookie.trim().startsWith("token")
+    );
+    console.log("Token cookie found:", tokenCookie);
+
+    if (!tokenCookie) {
+      return null;
+    }
+
+    const token = decodeURIComponent(tokenCookie.split("=")[1]);
+
+    return token;
+  } catch (error) {
+    console.error("Error parsing JWT token:", error);
     return null;
   }
 }
