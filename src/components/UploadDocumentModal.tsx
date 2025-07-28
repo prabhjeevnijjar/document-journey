@@ -19,25 +19,13 @@ interface ImportDocumentModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   fetchDocuments: () => void;
-  setCurrentPage: (page: number) => void;
-  currentPage: number;
 }
 
 export function ImportDocumentModal({
   open,
   onOpenChange,
-  setCurrentPage,
-  currentPage
 }: ImportDocumentModalProps) {
-  const {
-    documents,
-    totalDocuments,
-    isLoading,
-    setDocuments,
-    setTotalDocuments,
-    setLoading,
-    setError,
-  } = useDocumentStore();
+  const { setDocuments, setTotalDocuments, setError } = useDocumentStore();
   const { token } = useAuthStore();
   const [selectedFile, setSelectedFile] = React.useState<{
     name: string;
@@ -47,9 +35,6 @@ export function ImportDocumentModal({
     key: string;
   } | null>(null);
 
-  const handlePageIncrement = () => {
-    setCurrentPage(currentPage + 1);
-  };
   const handleDialogClose = (nextOpen: boolean) => {
     setSelectedFile(null);
     onOpenChange(nextOpen);

@@ -31,7 +31,7 @@ import { ImportDocumentModal } from "./UploadDocumentModal";
 import { useDocumentStore } from "@/app/store/documentStore";
 import axios from "axios";
 import { toast } from "sonner";
-import { bytesToMB, formatBytes, formatReadableDate } from "@/lib/utils";
+import { formatBytes, formatReadableDate } from "@/lib/utils";
 
 export function DocumentsTable() {
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -68,7 +68,6 @@ export function DocumentsTable() {
           setDocuments(response.data.data.documents);
           setTotalDocuments(response.data.data.total);
           setTotalPages(response.data.data.totalPages);
-          setError(null);
         }
       })
       .catch((error) => {
@@ -237,8 +236,6 @@ export function DocumentsTable() {
         open={modalOpen}
         onOpenChange={setModalOpen}
         fetchDocuments={fetchDocuments}
-        setCurrentPage={setCurrentPage}
-        currentPage={currentPage}
       />
     </div>
   );
