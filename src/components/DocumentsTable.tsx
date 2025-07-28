@@ -38,6 +38,10 @@ import {
   Trash2,
 } from "lucide-react";
 import { ImportDocumentModal } from "./UploadDocumentModal";
+import { useDocumentStore } from "@/app/store/documentStore";
+import axios from "axios";
+import { useAuthStore } from "@/app/store/authStore";
+import { toast } from "sonner";
 
 interface Document {
   id: string;
@@ -91,21 +95,66 @@ export function DocumentsTable() {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [modalOpen, setModalOpen] = React.useState(false);
 
-  // Get all unique tags from documents
-  const allTags = React.useMemo(() => {
-    const tagSet = new Set<string>();
-    documents.forEach((doc) => doc.tags.forEach((tag) => tagSet.add(tag)));
-    return Array.from(tagSet);
-  }, []);
+  const { token } = useAuthStore();
+  const {
+    documents,
+    totalDocuments,
+    isLoading,
+    setDocuments,
+    setTotalDocuments,
+    setLoading,
+    setError,
+  } = useDocumentStore();
+
+  const fetchDocuments = React.useCallback(() => {
+    setLoading(true);
+
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/documents`, {
+        params: {
+          page: currentPage,
+          limit: pageSize,
+          search: searchTerm,
+          tags: selectedTags.join(","),
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      })
+      .then((response) => {
+        if (response.data.status === "success") {
+          setDocuments(response.data.data.documents);
+          setTotalDocuments(response.data.data.total);
+          setError(null);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching documents:", error);
+        setError(error.response?.data?.message || "Failed to fetch documents");
+        toast.error("Failed to fetch documents");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [currentPage, pageSize, searchTerm, selectedTags, token]);
+
+  // Fetch documents when component mounts or dependencies change
+  React.useEffect(() => {
+    fetchDocuments();
+  }, [fetchDocuments]);
+
+  // Update pagination calculations
+  // const totalPages = Math.ceil(totalDocuments / pageSize);
+  // const startIndex = (currentPage - 1) * pageSize;
+  // const endIndex = startIndex + pageSize;
 
   const filteredDocuments = documents.filter((document) => {
-    const matchesSearch =
-      document.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      document.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTags =
-      selectedTags.length === 0 ||
-      selectedTags.some((tag) => document.tags.includes(tag));
-    return matchesSearch && matchesTags;
+    const matchesSearch = document?.originalFilename
+      ?.toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    return matchesSearch;
   });
 
   const totalPages = Math.ceil(filteredDocuments.length / pageSize);
@@ -115,26 +164,6 @@ export function DocumentsTable() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-  };
-
-  const renderTags = (tags: string[]) => {
-    if (tags.length === 0) {
-      return <span className="text-gray-500 text-sm">No tags</span>;
-    }
-    return (
-      <div className="flex flex-wrap gap-1">
-        {tags.slice(0, 2).map((tag) => (
-          <Badge key={tag} variant="secondary" className="text-xs">
-            {tag}
-          </Badge>
-        ))}
-        {tags.length > 2 && (
-          <Badge variant="secondary" className="text-xs">
-            +{tags.length - 2}
-          </Badge>
-        )}
-      </div>
-    );
   };
 
   return (
@@ -178,35 +207,6 @@ export function DocumentsTable() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <div className="p-2">
-              <div className="text-sm font-medium mb-2">Filter by tags:</div>
-              {allTags.length === 0 ? (
-                <div className="text-sm text-gray-500">No tags available</div>
-              ) : (
-                <div className="space-y-1">
-                  {allTags.map((tag) => (
-                    <label
-                      key={tag}
-                      className="flex items-center space-x-2 text-sm"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedTags.includes(tag)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedTags([...selectedTags, tag]);
-                          } else {
-                            setSelectedTags(
-                              selectedTags.filter((t) => t !== tag)
-                            );
-                          }
-                        }}
-                        className="rounded border-gray-300"
-                      />
-                      <span>{tag}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
               {selectedTags.length > 0 && (
                 <Button
                   variant="ghost"
@@ -250,14 +250,14 @@ export function DocumentsTable() {
               currentDocuments.map((document) => (
                 <TableRow key={document.id} className="hover:bg-gray-50">
                   <TableCell className="font-medium">
-                    {document.title}
+                    {document.originalFilename}
                   </TableCell>
                   <TableCell className="text-gray-600">
-                    {document.description}
+                    {document.fileSize}
                   </TableCell>
-                  <TableCell>{renderTags(document.tags)}</TableCell>
+                  <TableCell></TableCell>
                   <TableCell className="text-gray-600">
-                    {document.uploaded}
+                    {document.createdAt}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

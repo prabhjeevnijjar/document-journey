@@ -8,14 +8,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { UploadButton } from "@uploadthing/react";
 import { OurFileRouter } from "@/app/api/uploadthing/core";
 import { useAuthStore } from "@/app/store/authStore";
 import axios from "axios";
 import { toast } from "sonner";
+import { useDocumentStore } from "@/app/store/documentStore";
 
 interface ImportDocumentModalProps {
   open: boolean;
@@ -46,17 +44,8 @@ export function ImportDocumentModal({
     setSelectedFile(null);
     onOpenChange(false);
   };
-  console.log("selectedFile:", selectedFile);
-  const handleImport = () => {
-    if (!selectedFile || !title.trim()) {
-      alert("Please select a file and enter a title");
-      return;
-    }
 
-    handleCancel();
-  };
   const handleDeleteFile = async (fileKey: string) => {
-    console.log("Deleting file with key:", fileKey);
     fetch("/api/uploadthing/delete-uploadthing-file", {
       method: "POST",
       body: JSON.stringify({ key: fileKey }),
@@ -66,12 +55,8 @@ export function ImportDocumentModal({
         // console.log("Delete response:", res);
         return res.json();
       })
-      .then((data) => {
-        console.log("Delete success:", data);
-      })
-      .catch((err) => {
-        console.error("Error deleting file:", err);
-      });
+      .then(() => {})
+      .catch(() => {});
   };
   const handleFileDetailsUpload = async (file: {
     name: string;
@@ -96,6 +81,15 @@ export function ImportDocumentModal({
         if (response.data.status === "success") {
           toast.success(response.data.message);
           // return { success: true, document: response.data };
+          const docRes = fetch("/api/documents");
+          const updatedDocs = await docRes?.json();
+
+          // 3. Store in Zustand
+          useDocumentStore.getState().setDocuments(updatedDocs.data.documents);
+          useDocumentStore.getState().setTotalDocuments(updatedDocs.data.total);
+
+          setDocuments(response.data.data.documents);
+          setTotalDocuments(response.data.data.total);
         }
       })
       .catch((error) => {
@@ -167,12 +161,6 @@ export function ImportDocumentModal({
         <div className="flex justify-end gap-3 pt-4">
           <Button variant="outline" onClick={handleCancel}>
             Cancel
-          </Button>
-          <Button
-            onClick={handleImport}
-            disabled={!selectedFile || !title?.trim()}
-          >
-            Import
           </Button>
         </div>
       </DialogContent>
