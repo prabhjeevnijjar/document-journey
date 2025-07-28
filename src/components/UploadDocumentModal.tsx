@@ -52,6 +52,7 @@ export function ImportDocumentModal({
       .then(() => {})
       .catch(() => {});
   };
+  
   const handleFileDetailsUpload = async (file: {
     name: string;
     ufsUrl: string;

@@ -2,8 +2,9 @@ import { create } from 'zustand';
 
 export interface Contact {
   id: string;
-  name: string;
-  email?: string;
+  name?: string;
+  email: string;
+  createdAt: string;
 }
 
 interface ContactState {
