@@ -54,7 +54,6 @@ export function AddContactsModal({
         withCredentials: true,
       })
       .then((response) => {
-        console.log("Contact saved successfully:", response);
         if (response.data.status === "success") {
           axios
             .get(`${process.env.NEXT_PUBLIC_API_URL}/contacts`, {
@@ -62,7 +61,6 @@ export function AddContactsModal({
             })
             .then((response) => {
               if (response.data.status === "success") {
-                console.log("Fetched documents:", response.data);
                 // setContacts([]);
                 setContacts(response.data.data.contacts);
                 setTotalContacts(response.data.data.totalContacts);

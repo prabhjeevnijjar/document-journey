@@ -16,7 +16,6 @@ export function getUserFromCookie(): string | null {
     const tokenCookie = cookies.find((cookie) =>
       cookie.trim().startsWith("token")
     );
-    console.log("Token cookie found:", tokenCookie);
 
     if (!tokenCookie) {
       return null;

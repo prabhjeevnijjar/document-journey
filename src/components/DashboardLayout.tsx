@@ -64,8 +64,6 @@ export function DashboardLayout({
   }, []);
 
   useEffect(() => {
-    console.log("DashboardLayout mounted");
-
     const fetchUserData = () => {
       axios
         .get(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
@@ -74,11 +72,7 @@ export function DashboardLayout({
           },
           withCredentials: true,
         })
-        .then((response) => {
-          if (response.data.status === "success" && response.data.data) {
-            console.log("User data fetched successfully:", response.data.data);
-          }
-        })
+        .then(() => {})
         .catch((error) => {
           console.error("Error fetching user data:", error);
         });

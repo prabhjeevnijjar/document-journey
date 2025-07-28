@@ -73,7 +73,6 @@ export function ImportDocumentModal({
         withCredentials: true,
       })
       .then((response) => {
-        console.log("Document saved successfully:", response);
         if (response.data.status === "success") {
           axios
             .get(`${process.env.NEXT_PUBLIC_API_URL}/documents`, {
@@ -83,9 +82,7 @@ export function ImportDocumentModal({
               withCredentials: true,
             })
             .then((response) => {
-              console.log("Documents fetched successfully:", response);
               if (response.data.status === "success") {
-                console.log("Document saved successfully:", response);
                 setDocuments(response.data.data.documents);
                 setTotalDocuments(response.data.data.total);
                 setError(null);

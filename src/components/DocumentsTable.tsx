@@ -1,6 +1,8 @@
 "use client";
-
+import axios from "axios";
 import * as React from "react";
+import dynamic from 'next/dynamic';
+
 import {
   Table,
   TableBody,
@@ -11,7 +13,6 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,15 +30,23 @@ import {
 } from "lucide-react";
 import { ImportDocumentModal } from "./UploadDocumentModal";
 import { useDocumentStore } from "@/app/store/documentStore";
-import axios from "axios";
 import { toast } from "sonner";
 import { formatBytes, formatReadableDate } from "@/lib/utils";
+import { ViewPdfProps } from "./ViewPdf";
 
+const PdfViewerModal = dynamic<ViewPdfProps>(
+  () => import('./ViewPdf').then(mod => mod.ViewPdf),
+  { ssr: false }
+);
 export function DocumentsTable() {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [pageSize, setPageSize] = React.useState(10);
   const [currentPage, setCurrentPage] = React.useState(1);
   const [modalOpen, setModalOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
+  const [pdfUrl, setPdfUrl] = React.useState("");
+
+
   const [totalPages, setTotalPages] = React.useState(0);
   const {
     documents,
@@ -48,7 +57,6 @@ export function DocumentsTable() {
     setLoading,
     setError,
   } = useDocumentStore();
-  console.log("Current Page:", currentPage);
 
   const fetchDocuments = React.useCallback(() => {
     setLoading(true);
@@ -63,7 +71,6 @@ export function DocumentsTable() {
       })
       .then((response) => {
         if (response.data.status === "success") {
-          console.log("Fetched documents:", response.data);
           setDocuments([]);
           setDocuments(response.data.data.documents);
           setTotalDocuments(response.data.data.total);
@@ -84,7 +91,6 @@ export function DocumentsTable() {
   React.useEffect(() => {
     fetchDocuments();
   }, [fetchDocuments]);
-
   const filteredDocuments = documents.filter((document) => {
     const matchesSearch = document?.originalFilename
       ?.toLowerCase()
@@ -92,7 +98,7 @@ export function DocumentsTable() {
 
     return matchesSearch;
   });
-  console.log("Filtered Documents:", filteredDocuments);
+  console.log({ filteredDocuments })
 
   const handlePageChange = (page: number) =>
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
@@ -148,8 +154,8 @@ export function DocumentsTable() {
                   {searchTerm
                     ? "No documents found matching your filters."
                     : isLoading
-                    ? "Loading documents..."
-                    : "No documents found."}
+                      ? "Loading documents..."
+                      : "No documents found."}
                 </TableCell>
               </TableRow>
             ) : (
@@ -177,8 +183,11 @@ export function DocumentsTable() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Download className="w-4 h-4 mr-2" />
+                        <DropdownMenuItem >
+                          <Button onClick={() => { setPdfUrl(document.fileUrl); setOpen(true); }}>
+                            <Download className="w-4 h-4 mr-2" />
+
+                          </Button>
                           Download
                         </DropdownMenuItem>
                         <DropdownMenuItem>
@@ -237,6 +246,7 @@ export function DocumentsTable() {
         onOpenChange={setModalOpen}
         fetchDocuments={fetchDocuments}
       />
+      <PdfViewerModal url={pdfUrl} open={open} onOpenChange={setOpen} />
     </div>
   );
 }

@@ -61,7 +61,6 @@ export function ContactsTable() {
         withCredentials: true,
       })
       .then((response) => {
-        console.log("Fetched contacts:", response.data);
         if (response.data.status === "success") {
           setContacts([]);
           setContacts(response.data.data.contacts);

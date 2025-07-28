@@ -22,9 +22,6 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: () => set({ token: null }),
 }));
 
-useAuthStore.subscribe((state) => {
-  console.log("Auth Store Updated:", {
-    token: state.token,
-    userData: state.userData,
-  });
+useAuthStore.subscribe(() => {
+
 });

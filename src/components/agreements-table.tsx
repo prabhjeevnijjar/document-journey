@@ -34,7 +34,6 @@ import {
   ChevronsRight,
 } from "lucide-react";
 import { SendAgreementModal } from "./send-agreement-modal";
-import { useAuthStore } from "@/app/store/authStore";
 
 interface Agreement {
   id: string;
@@ -119,8 +118,6 @@ const getStatusBadge = (status: Agreement["status"]) => {
 };
 
 export function AgreementsTable() {
-    const { userData } = useAuthStore();
-  console.log("User Data:", userData);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [pageSize, setPageSize] = React.useState(10);
   const [currentPage, setCurrentPage] = React.useState(1);

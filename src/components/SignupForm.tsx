@@ -103,14 +103,10 @@ export function SignupForm({
     setOtp(value);
   };
 
-  const handleOtpComplete = (value: string) => {
-    console.log("OTP completed:", value);
-    // Handle OTP completion logic here
-  };
+  const handleOtpComplete = () => {};
 
   const handleSendOtp = async () => {
     // Simulate sending OTP id all firld are valid
-    console.log("Sending OTP to email:", email, { showOtpField });
     if (handleFormValidation()) {
       setIsLoading(true);
       const data = {
@@ -123,8 +119,6 @@ export function SignupForm({
         .post(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`, data)
         .then((response) => {
           if (response.status === 200 && response.data.status === "success") {
-            console.log("OTP sent!");
-            console.log({ response });
             setShowOtpField(true);
 
             toast.success("OTP sent to your email!");
@@ -132,9 +126,7 @@ export function SignupForm({
         })
         .catch((error) => {
           console.error("Error sending OTP:", error);
-          toast.error(
-            error.response?.data?.message
-          );
+          toast.error(error.response?.data?.message);
         })
         .finally(() => {
           setIsLoading(false);
@@ -143,7 +135,6 @@ export function SignupForm({
   };
 
   const handleCreateAccount = async () => {
-    console.log("Creating account with OTP:", otp);
     //verify otp
     setIsLoading(true);
     const data = {
@@ -156,9 +147,8 @@ export function SignupForm({
       })
       .then((response) => {
         if (response.status === 200 && response.data.status === "success") {
-          console.log({ response });
           toast.success("Account created successfully!");
-          
+
           setToken(response.data.token);
 
           setIsLoading(false);
@@ -175,11 +165,6 @@ export function SignupForm({
       });
   };
 
-  const handleResendOtp = () => {
-    // Logic to resend OTP
-    console.log("OTP resent!");
-  };
-
   const resetForm = () => {
     setFullName("");
     setEmail("");
@@ -192,7 +177,6 @@ export function SignupForm({
     setPasswordError("");
     setConfirmPasswordError("");
   };
-  console.log("showOtpField", showOtpField);
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
