@@ -6,7 +6,7 @@ export interface Document {
   fileUrl: string;
   createdAt: string;
   mimeType: string;
-  fileSize?: string;
+  fileSize: number;
   originalFilename?: string;
 }
 

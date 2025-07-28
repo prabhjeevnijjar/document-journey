@@ -18,15 +18,27 @@ import { useDocumentStore } from "@/app/store/documentStore";
 interface ImportDocumentModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  fetchDocuments: () => void;
+  setCurrentPage: (page: number) => void;
+  currentPage: number;
 }
 
 export function ImportDocumentModal({
   open,
   onOpenChange,
+  setCurrentPage,
+  currentPage
 }: ImportDocumentModalProps) {
+  const {
+    documents,
+    totalDocuments,
+    isLoading,
+    setDocuments,
+    setTotalDocuments,
+    setLoading,
+    setError,
+  } = useDocumentStore();
   const { token } = useAuthStore();
-  const [title, setTitle] = React.useState<string | null>(null);
-  const [description, setDescription] = React.useState("");
   const [selectedFile, setSelectedFile] = React.useState<{
     name: string;
     ufsUrl: string;
@@ -34,15 +46,13 @@ export function ImportDocumentModal({
     size: number;
     key: string;
   } | null>(null);
-  const [uploadedFileName, setUploadedFileName] = React.useState<string | null>(
-    null
-  );
 
-  const handleCancel = () => {
-    setTitle("");
-    setDescription("");
+  const handlePageIncrement = () => {
+    setCurrentPage(currentPage + 1);
+  };
+  const handleDialogClose = (nextOpen: boolean) => {
     setSelectedFile(null);
-    onOpenChange(false);
+    onOpenChange(nextOpen);
   };
 
   const handleDeleteFile = async (fileKey: string) => {
@@ -52,7 +62,6 @@ export function ImportDocumentModal({
       headers: { "Content-Type": "application/json" },
     })
       .then((res) => {
-        // console.log("Delete response:", res);
         return res.json();
       })
       .then(() => {})
@@ -78,18 +87,32 @@ export function ImportDocumentModal({
         withCredentials: true,
       })
       .then((response) => {
+        console.log("Document saved successfully:", response);
         if (response.data.status === "success") {
-          toast.success(response.data.message);
-          // return { success: true, document: response.data };
-          const docRes = fetch("/api/documents");
-          const updatedDocs = await docRes?.json();
-
-          // 3. Store in Zustand
-          useDocumentStore.getState().setDocuments(updatedDocs.data.documents);
-          useDocumentStore.getState().setTotalDocuments(updatedDocs.data.total);
-
-          setDocuments(response.data.data.documents);
-          setTotalDocuments(response.data.data.total);
+          axios
+            .get(`${process.env.NEXT_PUBLIC_API_URL}/documents`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              withCredentials: true,
+            })
+            .then((response) => {
+              console.log("Documents fetched successfully:", response);
+              if (response.data.status === "success") {
+                console.log("Document saved successfully:", response);
+                setDocuments(response.data.data.documents);
+                setTotalDocuments(response.data.data.total);
+                setError(null);
+                toast.success("Document uploaded successfully");
+                onOpenChange(false);
+              }
+            })
+            .catch((error) => {
+              console.error("Error saving document:", error);
+              toast.error(
+                error.response?.data?.message || "Failed to save document"
+              );
+            });
         }
       })
       .catch((error) => {
@@ -101,12 +124,21 @@ export function ImportDocumentModal({
       });
   };
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          handleDialogClose(nextOpen);
+        } else {
+          onOpenChange(nextOpen);
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Import Document</DialogTitle>
+          <DialogTitle>Upload Document</DialogTitle>
           <p className="text-sm text-gray-600">
-            Import a new document to your collection.
+            Upload a new document to your collection.
           </p>
         </DialogHeader>
 
@@ -122,7 +154,6 @@ export function ImportDocumentModal({
                 if (res && res.length > 0) {
                   const uploadedFile = res[0];
                   setSelectedFile(uploadedFile);
-                  setTitle(uploadedFile.name.replace(/\.[^/.]+$/, ""));
                   handleFileDetailsUpload(uploadedFile);
                   toast.success(
                     `File uploaded successfully: ${uploadedFile.name}`
@@ -146,7 +177,6 @@ export function ImportDocumentModal({
                     if (selectedFile) {
                       handleDeleteFile(selectedFile?.key);
                       setSelectedFile(null);
-                      setTitle(null);
                     }
                   }}
                 >
@@ -155,13 +185,6 @@ export function ImportDocumentModal({
               </div>
             )}
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex justify-end gap-3 pt-4">
-          <Button variant="outline" onClick={handleCancel}>
-            Cancel
-          </Button>
         </div>
       </DialogContent>
     </Dialog>
