@@ -13,25 +13,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Plus,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
 } from "lucide-react";
 import { SendAgreementModal } from "./SendAgreementModal";
 
@@ -172,48 +156,6 @@ export function AgreementsTable() {
             className="w-full"
           />
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              Columns
-              <ChevronDown className="w-4 h-4 ml-2" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuCheckboxItem
-              checked={visibleColumns.name}
-              onCheckedChange={(checked) =>
-                setVisibleColumns((prev) => ({ ...prev, name: checked }))
-              }
-            >
-              Agreement Name
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-              checked={visibleColumns.status}
-              onCheckedChange={(checked) =>
-                setVisibleColumns((prev) => ({ ...prev, status: checked }))
-              }
-            >
-              Status
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-              checked={visibleColumns.created}
-              onCheckedChange={(checked) =>
-                setVisibleColumns((prev) => ({ ...prev, created: checked }))
-              }
-            >
-              Created
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-              checked={visibleColumns.actions}
-              onCheckedChange={(checked) =>
-                setVisibleColumns((prev) => ({ ...prev, actions: checked }))
-              }
-            >
-              Actions
-            </DropdownMenuCheckboxItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
       {/* Table */}
@@ -285,40 +227,13 @@ export function AgreementsTable() {
           Total {filteredAgreements.length} row(s)
         </div>
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Rows per page</span>
-            <Select
-              value={pageSize.toString()}
-              onValueChange={(value) => {
-                setPageSize(Number(value));
-                setCurrentPage(1);
-              }}
-            >
-              <SelectTrigger className="w-16">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="5">5</SelectItem>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="20">20</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">
               Page {currentPage} of {totalPages || 1}
             </span>
             <div className="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(1)}
-                disabled={currentPage === 1}
-                className="w-8 h-8 p-0"
-              >
-                <ChevronsLeft className="w-4 h-4" />
-              </Button>
+
               <Button
                 variant="outline"
                 size="sm"
@@ -337,15 +252,7 @@ export function AgreementsTable() {
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(totalPages)}
-                disabled={currentPage === totalPages}
-                className="w-8 h-8 p-0"
-              >
-                <ChevronsRight className="w-4 h-4" />
-              </Button>
+
             </div>
           </div>
         </div>

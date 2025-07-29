@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 
 export interface Contact {
   id: string;
-  name?: string;
+  name: string;
   email: string;
   createdAt: string;
 }

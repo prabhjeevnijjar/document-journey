@@ -23,74 +23,16 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { Upload, X, UserPlus, Check, ChevronsUpDown } from "lucide-react";
+import { X, Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useContactStore } from "@/app/store/contactStore";
-import { useDocumentStore } from "@/app/store/documentStore";
-
-interface Document {
-  id: string;
-  name: string;
-  description: string;
-  type: string;
-}
-
-interface Contact {
-  id: string;
-  name: string;
-  email: string;
-  company?: string;
-}
+import { Contact, useContactStore } from "@/app/store/contactStore";
+import { Document, useDocumentStore } from "@/app/store/documentStore";
 
 interface SendAgreementModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const sampleDocuments: Document[] = [
-  {
-    id: "1",
-    name: "test",
-    description: "test doc",
-    type: "PDF",
-  },
-  {
-    id: "2",
-    name: "Contract Template",
-    description: "Standard contract template",
-    type: "DOCX",
-  },
-  {
-    id: "3",
-    name: "NDA Agreement",
-    description: "Non-disclosure agreement template",
-    type: "PDF",
-  },
-];
-
-const sampleContacts: Contact[] = [
-  {
-    id: "1",
-    name: "psn",
-    email: "prabhjeevnijjar@hotmail.com",
-  },
-  {
-    id: "2",
-    name: "pari",
-    email: "parinijjar@gmail.com",
-  },
-  {
-    id: "3",
-    name: "Prabhjeev Nijjar",
-    email: "prabhjeevnijjar@gmail.com",
-  },
-  {
-    id: "4",
-    name: "John Smith",
-    email: "john.smith@company.com",
-    company: "Tech Corp",
-  },
-];
 
 export function SendAgreementModal({
   open,
@@ -106,9 +48,9 @@ export function SendAgreementModal({
     setError,
     fetchContacts
   } = useContactStore();
-  const {documents, fetchDocuments } = useDocumentStore();
+  const { documents, fetchDocuments } = useDocumentStore();
   console.log({ contacts })
-  console.log({documents})
+  console.log({ documents })
   // fetchContacts(1, 10)
 
   const [selectedDocument, setSelectedDocument] =
@@ -134,13 +76,11 @@ export function SendAgreementModal({
     }
   }, [open, fetchDocuments]);
 
-  const filteredDocuments = sampleDocuments.filter(
+  const filteredDocuments = documents.filter(
     (doc) =>
-      doc.name.toLowerCase().includes(documentSearch.toLowerCase()) ||
-      doc.description.toLowerCase().includes(documentSearch.toLowerCase())
-  );
+      doc.name.toLowerCase().includes(documentSearch.toLowerCase()));
 
-  const filteredContacts = sampleContacts.filter(
+  const filteredContacts = contacts.filter(
     (contact) =>
       contact.name.toLowerCase().includes(contactSearch.toLowerCase()) ||
       contact.email.toLowerCase().includes(contactSearch.toLowerCase())
@@ -174,8 +114,7 @@ export function SendAgreementModal({
   const handleNext = () => {
     onOpenChange(false);
   };
-  React.useEffect(() => {
-  }, [currentPage])
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -229,9 +168,6 @@ export function SendAgreementModal({
                               <span className="font-medium">
                                 {document.name}
                               </span>
-                              <span className="text-sm text-gray-500">
-                                {document.description}
-                              </span>
                             </div>
                             <Check
                               className={cn(
@@ -248,9 +184,7 @@ export function SendAgreementModal({
                   </Command>
                 </PopoverContent>
               </Popover>
-              <Button variant="outline" size="icon">
-                <Upload className="h-4 w-4" />
-              </Button>
+
             </div>
           </div>
 
@@ -296,11 +230,7 @@ export function SendAgreementModal({
                               <span className="text-sm text-gray-500">
                                 {contact.email}
                               </span>
-                              {contact.company && (
-                                <span className="text-xs text-gray-400">
-                                  {contact.company}
-                                </span>
-                              )}
+
                             </div>
                             <Check
                               className={cn(
@@ -319,9 +249,7 @@ export function SendAgreementModal({
                   </Command>
                 </PopoverContent>
               </Popover>
-              <Button variant="outline" size="icon">
-                <UserPlus className="h-4 w-4" />
-              </Button>
+
             </div>
 
             {/* Selected Contacts */}

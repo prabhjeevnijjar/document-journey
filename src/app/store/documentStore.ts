@@ -67,9 +67,7 @@ export const useDocumentStore = create<DocumentState>((set) => ({
         isLoading: false,
         error: null,
       }));
-      
-      toast.success('Documents loaded successfully');
-      
+            
       return {
         totalPages: data.totalPages || 1,
         totalDocuments: data.total || 0
