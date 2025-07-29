@@ -20,6 +20,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+
 interface JWTPayload {
   id: number;
   email: string;
@@ -43,7 +44,7 @@ export function DashboardLayout({
 }: DashboardLayoutProps) {
   const pathname = usePathname();
   const { token, setUserData } = useAuthStore();
-
+console.log({user})
   const authPages = ["/login", "/signup"];
   const isAuthPage = authPages.includes(pathname);
   const title =

@@ -29,60 +29,24 @@ import {
 } from "lucide-react";
 import { AddContactsModal } from "./AddContactModal";
 import { useContactStore } from "@/app/store/contactStore";
-import axios from "axios";
-import { toast } from "sonner";
 import { formatReadableDate } from "@/lib/utils";
 
 export function ContactsTable() {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [pageSize, setPageSize] = React.useState(10);
   const [currentPage, setCurrentPage] = React.useState(1);
-  const [totalPages, setTotalPages] = React.useState(0);
   const [modalOpen, setModalOpen] = React.useState(false);
   const {
     contacts,
     totalContacts,
+    totalPages,
     isLoading,
-    setContacts,
-    setTotalContacts,
-    setLoading,
-    setError,
+    fetchContacts
   } = useContactStore();
 
-  const fetchContacts = React.useCallback(() => {
-    setLoading(true);
-
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}/contacts`, {
-        params: {
-          page: currentPage,
-          limit: pageSize,
-        },
-        withCredentials: true,
-      })
-      .then((response) => {
-        if (response.data.status === "success") {
-          setContacts([]);
-          setContacts(response.data.data.contacts);
-          setTotalContacts(response.data.data.totalContacts);
-          setTotalPages(response.data.data.totalPages);
-          setError(null);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching documents:", error);
-        setError(error.response?.data?.message || "Failed to fetch documents");
-        toast.error("Failed to fetch documents");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [currentPage]);
-
-  // Fetch documents when component mounts or dependencies change
   React.useEffect(() => {
-    fetchContacts();
-  }, [fetchContacts]);
+    fetchContacts(currentPage, pageSize);
+  }, [currentPage, pageSize, fetchContacts]);
 
   const filteredContacts = contacts?.filter((contact) => {
     const matchesSearch = contact?.email

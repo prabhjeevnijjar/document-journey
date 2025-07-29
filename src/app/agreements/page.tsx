@@ -1,4 +1,4 @@
-import { AgreementsTable } from "@/components/agreements-table"
+import { AgreementsTable } from "@/components/AgreementsTable"
 
 export default function AgreementsPage() {
   return (

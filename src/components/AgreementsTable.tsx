@@ -33,7 +33,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
-import { SendAgreementModal } from "./send-agreement-modal";
+import { SendAgreementModal } from "./SendAgreementModal";
 
 interface Agreement {
   id: string;

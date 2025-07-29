@@ -1,5 +1,4 @@
 "use client";
-import axios from "axios";
 import * as React from "react";
 import dynamic from 'next/dynamic';
 
@@ -30,7 +29,6 @@ import {
 } from "lucide-react";
 import { ImportDocumentModal } from "./UploadDocumentModal";
 import { useDocumentStore } from "@/app/store/documentStore";
-import { toast } from "sonner";
 import { formatBytes, formatReadableDate } from "@/lib/utils";
 import { ViewPdfProps } from "./ViewPdf";
 
@@ -42,55 +40,26 @@ export function DocumentsTable() {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [pageSize, setPageSize] = React.useState(10);
   const [currentPage, setCurrentPage] = React.useState(1);
+  const [totalPages, setTotalPages] = React.useState(1);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const [pdfUrl, setPdfUrl] = React.useState("");
 
-
-  const [totalPages, setTotalPages] = React.useState(0);
   const {
     documents,
     totalDocuments,
     isLoading,
-    setDocuments,
-    setTotalDocuments,
-    setLoading,
-    setError,
+    fetchDocuments
   } = useDocumentStore();
 
-  const fetchDocuments = React.useCallback(() => {
-    setLoading(true);
-
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}/documents`, {
-        params: {
-          page: currentPage,
-          limit: pageSize,
-        },
-        withCredentials: true,
-      })
-      .then((response) => {
-        if (response.data.status === "success") {
-          setDocuments([]);
-          setDocuments(response.data.data.documents);
-          setTotalDocuments(response.data.data.total);
-          setTotalPages(response.data.data.totalPages);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching documents:", error);
-        setError(error.response?.data?.message || "Failed to fetch documents");
-        toast.error("Failed to fetch documents");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [currentPage]);
-
-  // Fetch documents when component mounts or dependencies change
   React.useEffect(() => {
-    fetchDocuments();
-  }, [fetchDocuments]);
+    const fetchData = async () => {
+      const result = await fetchDocuments(currentPage, pageSize);
+      setTotalPages(result.totalPages);
+    };
+    fetchData();
+  }, [currentPage, pageSize, fetchDocuments]);
+
   const filteredDocuments = documents.filter((document) => {
     const matchesSearch = document?.originalFilename
       ?.toLowerCase()
@@ -244,7 +213,7 @@ export function DocumentsTable() {
       <ImportDocumentModal
         open={modalOpen}
         onOpenChange={setModalOpen}
-        fetchDocuments={fetchDocuments}
+        fetchDocuments={() => fetchDocuments(currentPage, pageSize)}
       />
       <PdfViewerModal url={pdfUrl} open={open} onOpenChange={setOpen} />
     </div>

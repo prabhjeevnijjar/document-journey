@@ -25,6 +25,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Upload, X, UserPlus, Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useContactStore } from "@/app/store/contactStore";
+import { useDocumentStore } from "@/app/store/documentStore";
 
 interface Document {
   id: string;
@@ -94,6 +96,21 @@ export function SendAgreementModal({
   open,
   onOpenChange,
 }: SendAgreementModalProps) {
+  const {
+    contacts,
+    totalContacts,
+    isLoading,
+    setContacts,
+    setTotalContacts,
+    setLoading,
+    setError,
+    fetchContacts
+  } = useContactStore();
+  const {documents, fetchDocuments } = useDocumentStore();
+  console.log({ contacts })
+  console.log({documents})
+  // fetchContacts(1, 10)
+
   const [selectedDocument, setSelectedDocument] =
     React.useState<Document | null>(null);
   const [selectedContacts, setSelectedContacts] = React.useState<Contact[]>([]);
@@ -101,6 +118,21 @@ export function SendAgreementModal({
   const [contactSearchOpen, setContactSearchOpen] = React.useState(false);
   const [documentSearch, setDocumentSearch] = React.useState("");
   const [contactSearch, setContactSearch] = React.useState("");
+  const [pageSize, setPageSize] = React.useState(10);
+  const [currentPage, setCurrentPage] = React.useState(1);
+
+  // Fetch contacts when modal opens
+  React.useEffect(() => {
+    if (open) {
+      fetchContacts(1, 10);
+    }
+  }, [open, fetchContacts]);
+
+  React.useEffect(() => {
+    if (open) {
+      fetchDocuments(1, 10);
+    }
+  }, [open, fetchDocuments]);
 
   const filteredDocuments = sampleDocuments.filter(
     (doc) =>
@@ -142,6 +174,8 @@ export function SendAgreementModal({
   const handleNext = () => {
     onOpenChange(false);
   };
+  React.useEffect(() => {
+  }, [currentPage])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
