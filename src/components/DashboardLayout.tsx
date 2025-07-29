@@ -45,7 +45,7 @@ export function DashboardLayout({
   const pathname = usePathname();
   const { token, setUserData } = useAuthStore();
 console.log({user})
-  const authPages = ["/login", "/signup"];
+  const authPages = ["/login", "/signup", "/"];
   const isAuthPage = authPages.includes(pathname);
   const title =
     pathname === "/dashboard"

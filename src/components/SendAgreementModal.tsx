@@ -27,6 +27,7 @@ import { X, Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Contact, useContactStore } from "@/app/store/contactStore";
 import { Document, useDocumentStore } from "@/app/store/documentStore";
+import { useRouter } from "next/navigation";
 
 interface SendAgreementModalProps {
   open: boolean;
@@ -52,7 +53,7 @@ export function SendAgreementModal({
   console.log({ contacts })
   console.log({ documents })
   // fetchContacts(1, 10)
-
+  const router = useRouter()
   const [selectedDocument, setSelectedDocument] =
     React.useState<Document | null>(null);
   const [selectedContacts, setSelectedContacts] = React.useState<Contact[]>([]);
@@ -112,6 +113,7 @@ export function SendAgreementModal({
   };
 
   const handleNext = () => {
+    router.push("/agreements/create")
     onOpenChange(false);
   };
 
