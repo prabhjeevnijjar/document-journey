@@ -1,82 +1,41 @@
 import { create } from 'zustand';
 import { toast } from 'sonner';
+import axios from 'axios';
 
-// Enums matching Prisma schema
-export enum ActorRole {
-  CREATOR = 'CREATOR',
-  SIGNER = 'SIGNER'
+export interface SignatureCoords {
+    id: string;
+    page: number;
+    xPct: number;
+    yPct: number;
+    wPct: number;
+    hPct: number;
 }
 
-export enum ActorAction {
-  CREATED = 'CREATED',
-  SENT = 'SENT',
-  OPENED = 'OPENED',
-  SIGNED = 'SIGNED',
-  EXPIRED = 'EXPIRED',
-  VIEWED = 'VIEWED'
-}
-
-export enum SignerStatus {
-  PENDING = 'PENDING',
-  SIGNED = 'SIGNED'
+interface ReceiverEmail {
+    name: string;
+    email: string;
 }
 
 export interface Agreement {
-  id: number;
   name: string;
   creatorId: number;
-  file?: Uint8Array;
-  receiverEmail: string;
+  fileUrl: string;
+  receiverEmail: ReceiverEmail[];
   status: string;
-  signatureCoords?: string;
+  signatureCoords: SignatureCoords[];
   createdAt: string;
-  mimeType?: string;
-  fileSize?: number;
-  originalFilename?: string;
-  
-  // Relations
-  creator?: {
-    id: number;
-    email: string;
-    name?: string;
-  };
-  signers?: AgreementSigner[];
-  trails?: AgreementTrail[];
+  mimeType: string;
+  fileSize: number;
+  originalFilename: string;
 }
 
-export interface AgreementSigner {
-  id: number;
-  agreementId: number;
-  signerEmail: string;
-  signerName?: string;
-  status: SignerStatus;
-  signedAt?: string;
-  signatureCoords?: string;
-}
-
-export interface AgreementTrail {
-  id: number;
-  agreementId: number;
-  actorId?: number;
-  actorRole: ActorRole;
-  actorAction: ActorAction;
-  createdAt: string;
-  ipAddress?: string;
-  
-  actor?: {
-    id: number;
-    email: string;
-    name?: string;
-  };
-}
-
-export interface CreateAgreementData {
+interface CreateAgreementData {
   name: string;
-  receiverEmail: string;
-  file?: File;
+  receiverEmail: ReceiverEmail[];
+  fileUrl: string;
   mimeType?: string;
-  fileSize?: number;
-  originalFilename?: string;
+  signatureCoords: SignatureCoords[];
+  originalFilename: string;
 }
 
 interface AgreementState {
@@ -86,7 +45,7 @@ interface AgreementState {
   totalPages: number;
   isLoading: boolean;
   error: string | null;
-
+  agreementData: CreateAgreementData | null;
   // setters
   setAgreements: (agreements: Agreement[]) => void;
   setTotalAgreements: (total: number) => void;
@@ -94,10 +53,10 @@ interface AgreementState {
   setTotalPages: (pages: number) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  
+  setAgreementData: (data: CreateAgreementData | null) => void;
   // API functions
   fetchAgreements: (page: number, limit: number) => void;
-  createAgreement: (data: CreateAgreementData) => Promise<{ success: boolean; agreement?: Agreement; error?: string }>;
+  createAgreement: (data: CreateAgreementData) => void;
   getAgreementById: (id: number) => Promise<{ success: boolean; agreement?: Agreement; error?: string }>;
 }
 
@@ -108,6 +67,7 @@ export const useAgreementStore = create<AgreementState>((set, get) => ({
   totalPages: 1,
   isLoading: false,
   error: null,
+  agreementData: null,
 
   setAgreements: (agreements) => set({ agreements }),
   setTotalAgreements: (total) => set({ totalAgreements: total }),
@@ -115,6 +75,7 @@ export const useAgreementStore = create<AgreementState>((set, get) => ({
   setTotalPages: (pages) => set({ totalPages: pages }),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
+  setAgreementData: (data) => set({ agreementData: data }),
 
   fetchAgreements: async (page: number = 1, limit: number = 10) => {
     set({ isLoading: true, error: null });
@@ -172,71 +133,49 @@ export const useAgreementStore = create<AgreementState>((set, get) => ({
   },
 
   createAgreement: async (data: CreateAgreementData) => {
+    console.log("============",data)
     set({ isLoading: true, error: null });
-    try {
-      const formData = new FormData();
-      formData.append('name', data.name);
-      formData.append('receiverEmail', data.receiverEmail);
-      
-      if (data.file) {
-        formData.append('file', data.file);
-      }
-      
-      if (data.mimeType) {
-        formData.append('mimeType', data.mimeType);
-      }
-      
-      if (data.fileSize) {
-        formData.append('fileSize', data.fileSize.toString());
-      }
-      
-      if (data.originalFilename) {
-        formData.append('originalFilename', data.originalFilename);
-      }
-
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/agreements`, {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        const errorMessage = errorData.message || `HTTP ${res.status}: ${res.statusText}`;
-        throw new Error(errorMessage);
-      }
-
-      const response = await res.json();
-
-      // Validate response structure
-      if (!response.data || !response.data.agreement) {
+    
+    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/agreements`, data, {
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => {
+      const responseData = response.data;
+    console.log({responseData})
+      if (!responseData.data || !responseData.data.agreement) {
         throw new Error('Invalid response format from server');
       }
-
-      const newAgreement = response.data.agreement;
-
-      // Add the new agreement to the current list
+    
+      const newAgreement = responseData.data.agreement;
+    
+      // Update state/store with new agreement
       set((state) => ({
         agreements: [newAgreement, ...state.agreements],
         totalAgreements: state.totalAgreements + 1,
         isLoading: false,
         error: null,
       }));
-
+    
       toast.success('Agreement created successfully');
       return { success: true, agreement: newAgreement };
-    } catch (e: any) {
-      const errorMessage = e.message || 'Failed to create agreement';
-      console.error('Error creating agreement:', e);
-
+    })
+    .catch((error) => {
+      const errorMessage =
+        error.response?.data?.message || error.message || 'Failed to create agreement';
+      console.error('Error creating agreement:', errorMessage);
+    
       set({
         error: errorMessage,
         isLoading: false,
       });
-
+    
       toast.error(errorMessage);
       return { success: false, error: errorMessage };
-    }
+    });
+    
   },
 
   getAgreementById: async (id: number) => {

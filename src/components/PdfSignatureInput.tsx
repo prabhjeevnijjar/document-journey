@@ -251,13 +251,6 @@ export default function PdfSignatureInput({
           </div>
         </div>
       </Document>
-      {/* Debug: list all input fields/coords */}
-      <div style={{ fontSize: '12px', marginTop: 12 }}>
-        <strong>Saved fields (relative % coords):</strong>
-        <pre style={{ background: '#f5f5fa', color: '#323248', padding: 10, borderRadius: 4 }}>
-          {JSON.stringify(fields, null, 2)}
-        </pre>
-      </div>
     </div>
   );
 }

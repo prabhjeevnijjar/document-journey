@@ -28,6 +28,8 @@ import { cn } from "@/lib/utils";
 import { Contact, useContactStore } from "@/app/store/contactStore";
 import { Document, useDocumentStore } from "@/app/store/documentStore";
 import { useRouter } from "next/navigation";
+import { useAgreementStore } from "@/app/store/agreementsStore";
+import { toast } from "sonner";
 
 interface SendAgreementModalProps {
   open: boolean;
@@ -41,15 +43,11 @@ export function SendAgreementModal({
 }: SendAgreementModalProps) {
   const {
     contacts,
-    totalContacts,
-    isLoading,
-    setContacts,
-    setTotalContacts,
-    setLoading,
-    setError,
+    
     fetchContacts
   } = useContactStore();
   const { documents, fetchDocuments } = useDocumentStore();
+  const { setAgreementData } = useAgreementStore();
   console.log({ contacts })
   console.log({ documents })
   // fetchContacts(1, 10)
@@ -113,6 +111,25 @@ export function SendAgreementModal({
   };
 
   const handleNext = () => {
+// add validations for receiverEmail, originalFilename, fileUrl
+    if (!selectedDocument) {
+      toast.error("Please select a document");
+      return;
+    }
+    if (selectedContacts.length === 0) {
+      toast.error("Please select at least one recipient");
+      return;
+    }
+    setAgreementData({
+      name: "",
+      receiverEmail: selectedContacts.map((contact) => ({
+        name: contact.name,
+        email: contact.email
+      })),
+      fileUrl: selectedDocument?.fileUrl || "",
+      originalFilename: selectedDocument?.originalFilename || "",
+      signatureCoords: []
+    })
     router.push("/agreements/create")
     onOpenChange(false);
   };
